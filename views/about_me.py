@@ -11,12 +11,14 @@ def show_contact_form():
 # --- HERO SECTION ---
 col1, col2 = st.columns(2, gap="small", vertical_alignment="center")
 with col1:
-    st.image("./assets/profile_image.png", width=230)
+    st.image("./assets/lancaster picture.jpeg", width=230)
 
 with col2:
-    st.title("Sven Bosau", anchor=False)
+    st.title("Lancaster Chris", anchor=False)
     st.write(
-        "Senior Data Analyst, assisting enterprises by supporting data-driven decision-making."
+        "DevOps, AWS, MLOps, and Solutions Engineering expert, "
+        "helping enterprises build scalable, automated, and "
+        "data-driven infrastructure solutions."
     )
     if st.button("✉️ Contact Me"):
         show_contact_form()
@@ -27,10 +29,14 @@ st.write("\n")
 st.subheader("Experience & Qualifications", anchor=False)
 st.write(
     """
-    - 7 Years experience extracting actionable insights from data
-    - Strong hands-on experience and knowledge in Python and Excel
-    - Good understanding of statistical principles and their respective applications
-    - Excellent team-player and displaying a strong sense of initiative on tasks
+    - 7+ Years experience in DevOps, cloud infrastructure, and automation
+    - Strong expertise in AWS services (EC2, S3, Lambda, ECS, 
+      CloudFormation)
+    - Proven track record in MLOps pipeline development and 
+      model deployment
+    - Solutions Engineering expert with experience in enterprise 
+      architecture
+    - Excellent problem-solving skills and strong initiative in complex technical projects
     """
 )
 
@@ -39,9 +45,12 @@ st.write("\n")
 st.subheader("Hard Skills", anchor=False)
 st.write(
     """
-    - Programming: Python (Scikit-learn, Pandas), SQL, VBA
-    - Data Visualization: PowerBi, MS Excel, Plotly
-    - Modeling: Logistic regression, linear regression, decision trees
-    - Databases: Postgres, MongoDB, MySQL
+    - Cloud & DevOps: AWS (EC2, S3, Lambda, ECS, 
+      CloudFormation), Docker, Kubernetes, CI/CD pipelines
+    - Programming: Python, Bash, Terraform, YAML/JSON, SQL
+    - MLOps: Model deployment, monitoring, MLflow, Kubeflow, 
+      automated ML pipelines
+    - Infrastructure: Infrastructure as Code, monitoring (CloudWatch, 
+      Prometheus), logging
     """
 )
