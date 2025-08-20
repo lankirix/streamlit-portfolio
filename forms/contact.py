@@ -1,108 +1,70 @@
-import re
 import streamlit as st
-import requests  # pip install requests
-
-# Retrieve the webhook URL from Streamlit secrets
-WEBHOOK_URL = st.secrets["WEBHOOK_URL"]
-
-
-def is_valid_email(email):
-    """Validate email using regex."""
-    pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
-    return re.match(pattern, email) is not None
-
-
-def is_valid_nigerian_phone(phone):
-    """
-    Validate Nigerian phone numbers.
-    Accepts formats like:
-    - 08012345678
-    - +234 801 234 5678
-    - 0817 123 4567
-    - (234) 803 456 7890
-    - 0706-123-4567
-    """
-    # Remove common separators
-    cleaned = re.sub(r"[\s\-\(\)\+]", "", phone)
-
-    # Should be 11 digits starting with 0 (local) or 13 digits starting with 234 (international)
-    if re.fullmatch(r"0[789]\d{9}", cleaned):  # e.g. 08012345678
-        return True
-    if re.fullmatch(r"234[789]\d{9}", cleaned):  # e.g. 2348012345678
-        return True
-
-    return False
-
+import requests
 
 def contact_form():
-    st.markdown("### 📬 Send Me a Message")
-    st.write("Please fill out the form below to get in touch.")
+    st.header("📬 Get in Touch")
 
-    with st.form("contact_form"):
-        name = st.text_input(
-            "Your Full Name*", placeholder="Enter your full name"
-        )
-        email = st.text_input(
-            "Email Address*", placeholder="you@example.com"
-        )
-        phone = st.text_input(
-            "Phone Number*",
-            placeholder="e.g., 0801 234 5678 or +234 812 345 6789"  # Nigerian format
-        )
-        message = st.text_area(
-            "Your Message*", placeholder="Type your message here..."
-        )
-        submit_button = st.form_submit_button("📤 Send Message")
+    # Tabs for Contact vs Work With Me
+    tab1, tab2 = st.tabs(["✉️ Contact Me", "🤝 Work With Me"])
 
-    if submit_button:
-        # Validate all fields
-        if not WEBHOOK_URL:
-            st.error("📧 The contact form is not configured. Please try later.", icon="⚠️")
-            st.stop()
+    # --- Contact Form ---
+    with tab1:
+        with st.form("contact_form"):
+            name = st.text_input("Your Name")
+            email = st.text_input("Your Email")
+            phone = st.text_input("Your Phone Number")
+            message = st.text_area("Your Message")
+            submitted = st.form_submit_button("Send")
 
-        if not name.strip():
-            st.error("🧑 Please enter your full name.", icon="❗")
-            st.stop()
+        if submitted:
+            send_to_webhook("contact", name, email, phone, {"message": message})
 
-        if not email:
-            st.error("📨 Please enter your email address.", icon="❗")
-            st.stop()
+    # --- Work With Me Form ---
+    with tab2:
+        with st.form("work_form"):
+            name = st.text_input("Your Name", key="work_name")
+            email = st.text_input("Your Email", key="work_email")
+            phone = st.text_input("Your Phone Number", key="work_phone")
+            company = st.text_input("Company / Organization", key="work_company")
+            problem = st.text_area("Describe your business problem", key="work_problem")
+            goal = st.text_area("What outcome do you want to achieve?", key="work_goal")
+            submitted = st.form_submit_button("Submit Proposal")
 
-        if not is_valid_email(email):
-            st.error("📧 Please enter a valid email address.", icon="❗")
-            st.stop()
-
-        if not phone:
-            st.error("📱 Please enter your phone number.", icon="❗")
-            st.stop()
-
-        if not is_valid_nigerian_phone(phone):
-            st.error(
-                "📞 Invalid Nigerian phone number. "
-                "Use format: 0801 234 5678 or +234 812 345 6789", 
-                icon="❗"
+        if submitted:
+            send_to_webhook(
+                "work_with_me",
+                name,
+                email,
+                phone,
+                {
+                    "company": company,
+                    "problem": problem,
+                    "goal": goal,
+                },
             )
-            st.stop()
 
-        if not message.strip():
-            st.error("💬 Please write a message.", icon="❗")
-            st.stop()
+def send_to_webhook(form_type, name, email, phone, extra_fields):
+    try:
+        webhook_url = st.secrets["WEBHOOK_URL"]
 
-        # Prepare payload
-        data = {
-            "name": name.strip(),
-            "email": email.lower().strip(),
-            "phone": re.sub(r"[^\d+]", "", phone).replace("234", "0", 1) if phone.startswith("234") else phone,
-            "message": message.strip(),
+        payload = {
+            "form_type": form_type,
+            "name": name,
+            "email": email,
+            "phone": phone,
+            **extra_fields,
         }
 
-        # Send to webhook
-        try:
-            response = requests.post(WEBHOOK_URL, json=data, timeout=10)
-            if response.status_code == 200:
-                st.success("✅ Your message has been sent successfully! I'll get back to you soon. 🎉", icon="🚀")
-            else:
-                st.error("❌ Something went wrong. Please try again later.", icon="😨")
-        except Exception as e:
-            st.error(f"⚠️ Network error: {e}. Could not send your message.", icon="🔌")
-            st.stop()
+        response = requests.post(webhook_url, json=payload)
+
+        if response.status_code == 200:
+            st.success("✅ Your submission has been sent successfully!")
+        else:
+            st.error(f"❌ Failed to send. Server responded with {response.status_code}")
+            st.write(response.text)
+
+    except KeyError:
+        st.error("❌ Missing `WEBHOOK_URL` in Streamlit `secrets.toml`.")
+    except Exception as e:
+        st.error("⚠️ An unexpected error occurred.")
+        st.write(e)
