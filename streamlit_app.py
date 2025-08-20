@@ -1,5 +1,6 @@
 import streamlit as st
-
+import os
+from PIL import Image
 
 # --- PAGE SETUP ---
 about_page = st.Page(
@@ -19,11 +20,7 @@ project_2_page = st.Page(
     icon=":material/smart_toy:",
 )
 
-
-# --- NAVIGATION SETUP [WITHOUT SECTIONS] ---
-# pg = st.navigation(pages=[about_page, project_1_page, project_2_page])
-
-# --- NAVIGATION SETUP [WITH SECTIONS]---
+# --- NAVIGATION SETUP [WITH SECTIONS] ---
 pg = st.navigation(
     {
         "Info": [about_page],
@@ -31,11 +28,13 @@ pg = st.navigation(
     }
 )
 
-
 # --- SHARED ON ALL PAGES ---
-st.logo("assets/codingisfun_logo.png")
-st.sidebar.markdown("Made with ❤️ by [Sven](https://youtube.com/@codingisfun)")
+BASE_DIR = os.path.dirname(__file__)
+logo_path = os.path.join(BASE_DIR, "public", "lankirix_logo.jpeg")
 
+st.logo(Image.open(logo_path))
+st.sidebar.markdown("Made with ❤️ by [Lankirix Automations](https://www.linkedin.com/in/lankirix/)")
 
 # --- RUN NAVIGATION ---
 pg.run()
+
